@@ -141,7 +141,7 @@ public class SolarSystem extends JFrame implements Runnable
 			stars[i + 1] = rand.nextInt(SCREEN_H); // Generate a y position
 		}
 		
-		showOrbits = true;
+		showOrbits = false;
 	}
 	
 	private void processInput()
