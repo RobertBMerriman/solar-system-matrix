@@ -3,6 +3,7 @@ package uk.co.merriman.b.robert.solarsystemmatrix;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
+import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.*;
 
@@ -21,16 +22,14 @@ public class SolarSystem extends JFrame implements Runnable
 	private Thread gameThread;
 	private KeyboardInput keyboard;
 	
-	private float mercRot, mercDelta;
-	private float venusRot, venusDelta;
-	private float earthRot, earthDelta, moonRot, moonDelta;
-	private float marsRot, marsDelta;
+	private ArrayList<CosmicBody> cosmicBodies;
 	
 	private boolean showStars;
 	private int[] stars;
 	private Random rand = new Random();
 	
 	private boolean showOrbits;
+	
 	
 	
 	protected void createAndShowGUI()
@@ -127,11 +126,20 @@ public class SolarSystem extends JFrame implements Runnable
 		frameRate = new FrameRate();
 		frameRate.initialise();
 		
-		mercDelta = (float) Math.toRadians(1.0); 
-		venusDelta = (float) Math.toRadians(3.0); 
-		earthDelta = (float) Math.toRadians(0.5); // Move 0.5 degrees per frame
-		moonDelta = (float) Math.toRadians(2.5); // Move 2.5 degrees per frame
-		marsDelta = (float) Math.toRadians(2.0); 
+		cosmicBodies = new ArrayList<CosmicBody>();
+		
+		CosmicBody sun = new CosmicBody(null, 0.0f, 0.0f, SCREEN_W / 2, SCREEN_H / 2, 100, Color.YELLOW);
+		cosmicBodies.add(sun);
+		CosmicBody mercury = new CosmicBody(sun, 0.0f, (float) Math.toRadians(1.0), SCREEN_W / 8, 0, 12, Color.DARK_GRAY);
+		cosmicBodies.add(mercury);
+		CosmicBody venus = new CosmicBody(sun, 0.0f, (float) Math.toRadians(3.0), SCREEN_W / 6, 0, 18, Color.ORANGE);
+		cosmicBodies.add(venus);
+		CosmicBody earth = new CosmicBody(sun, 0.0f, (float) Math.toRadians(0.5), SCREEN_W / 4, 0, 20, Color.BLUE);
+		cosmicBodies.add(earth);
+		CosmicBody moon = new CosmicBody(earth, 0.0f, (float) Math.toRadians(2.5), 30, 0, 10, Color.LIGHT_GRAY);
+		cosmicBodies.add(moon);
+		CosmicBody mars = new CosmicBody(sun, 0.0f, (float) Math.toRadians(2.0), SCREEN_W / 3, 0, 16, Color.RED);
+		cosmicBodies.add(mars);
 		
 		showStars = true;
 		stars = new int[1000]; // 500 stars
@@ -176,107 +184,14 @@ public class SolarSystem extends JFrame implements Runnable
 		}
 		
 		
-		// Draw the Sun
-		Matrix3x3f sunMat = Matrix3x3f.identity();
-		sunMat = sunMat.mul(Matrix3x3f.translate(SCREEN_W / 2, SCREEN_H / 2));
-		Vector2f sun = sunMat.mul(new Vector2f());
-		
-		g.setColor(Color.YELLOW);
-		g.fillOval((int) sun.x - 50, (int) sun.y - 50, 100, 100);
-		
-		
-		
-		// Draw Mercury's Orbit
-		if (showOrbits)
+		for (CosmicBody cosmicBody : cosmicBodies)
 		{
-			g.setColor(Color.GRAY);
-			g.drawOval((int) sun.x - SCREEN_W / 8, (int) sun.y - SCREEN_W / 8, SCREEN_W / 4, SCREEN_W / 4);
-		}
-			
-		// Draw Mercury
-		Matrix3x3f mercMat = Matrix3x3f.translate(SCREEN_W / 8, 0);
-		mercMat = mercMat.mul(Matrix3x3f.rotate(mercRot));
-		mercMat = mercMat.mul(sunMat);
-		mercRot += mercDelta;
-		
-		Vector2f merc = mercMat.mul(new Vector2f());
-		g.setColor(Color.DARK_GRAY);
-		g.fillOval((int) merc.x - 6, (int) merc.y - 6, 12, 12);
-		
-		
-		
-		// Draw Venus's orbit
-		if (showOrbits)
-		{
-			g.setColor(Color.GRAY);
-			g.drawOval((int) sun.x - SCREEN_W / 6, (int) sun.y - SCREEN_W / 6, SCREEN_W / 3, SCREEN_W / 3);
+			cosmicBody.move();
+			if (showOrbits)
+				cosmicBody.drawOrbit(g);
+			cosmicBody.draw(g);
 		}
 		
-		// Draw Venus
-		Matrix3x3f venusMat = Matrix3x3f.translate(SCREEN_W / 6, 0);
-		venusMat = venusMat.mul(Matrix3x3f.rotate(venusRot));
-		venusMat = venusMat.mul(sunMat);
-		venusRot += venusDelta;
-		
-		Vector2f venus = venusMat.mul(new Vector2f());
-		g.setColor(Color.ORANGE);
-		g.fillOval((int) venus.x - 9, (int) venus.y - 9, 18, 18);
-		
-		
-		
-		// Draw Earth's orbit
-		if (showOrbits)
-		{
-			g.setColor(Color.GRAY);
-			g.drawOval((int) sun.x - SCREEN_W / 4, (int) sun.y - SCREEN_W / 4, SCREEN_W / 2, SCREEN_W / 2);
-		}
-			
-		// Draw Earth
-		Matrix3x3f earthMat = Matrix3x3f.translate(SCREEN_W / 4, 0);
-		earthMat = earthMat.mul(Matrix3x3f.rotate(earthRot));
-		earthMat = earthMat.mul(sunMat);
-		earthRot += earthDelta;
-		
-		Vector2f earth = earthMat.mul(new Vector2f());
-		g.setColor(Color.BLUE);
-		g.fillOval((int) earth.x - 10, (int) earth.y - 10, 20, 20);
-		
-		
-		// Draw the Moon's orbit
-		if (showOrbits)
-		{
-			g.setColor(Color.GRAY);
-			g.drawOval((int) earth.x - 30, (int) earth.y - 30, 60, 60);
-		}
-		
-		// Draw the Moon
-		Matrix3x3f moonMat = Matrix3x3f.translate(30, 0);
-		moonMat = moonMat.mul(Matrix3x3f.rotate(moonRot));
-		moonMat = moonMat.mul(earthMat);
-		moonRot += moonDelta;
-		
-		Vector2f moon = moonMat.mul(new Vector2f());
-		g.setColor(Color.LIGHT_GRAY);
-		g.fillOval((int) moon.x - 5, (int) moon.y - 5, 10, 10);
-		
-		
-		
-		// Draw Mars's orbit
-		if (showOrbits)
-		{
-			g.setColor(Color.GRAY);
-			g.drawOval((int) sun.x - SCREEN_W / 3, (int) sun.y - SCREEN_W / 3, (int) (SCREEN_W / 1.5), (int) (SCREEN_W / 1.5));
-		}
-			
-		// Draw Mars
-		Matrix3x3f marsMat = Matrix3x3f.translate(SCREEN_W / 3, 0);
-		marsMat = marsMat.mul(Matrix3x3f.rotate(marsRot));
-		marsMat = marsMat.mul(sunMat);
-		marsRot += marsDelta;
-		
-		Vector2f mars = marsMat.mul(new Vector2f());
-		g.setColor(Color.RED);
-		g.fillOval((int) mars.x - 8, (int) mars.y - 8, 16, 16);
 		
 		
 		// End draw

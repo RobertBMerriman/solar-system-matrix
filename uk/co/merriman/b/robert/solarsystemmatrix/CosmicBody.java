@@ -14,7 +14,7 @@ public class CosmicBody
 	private Vector2f bodyVector;
 	
 	private float rotation, rotationDelta;
-	private int translation, halfTranslation;
+	private int translationX, doubleTranslationX, translationY;
 	
 	private int size, halfSize;
 	
@@ -26,15 +26,16 @@ public class CosmicBody
 	
 	
 	
-	public CosmicBody(CosmicBody parent, float rotation, float rotationDelta, int translation, int size, Color color)
+	public CosmicBody(CosmicBody parent, float rotation, float rotationDelta, int translationX, int translationY, int size, Color color)
 	{
 		this.parent = parent;
 		
 		this.rotation = rotation;
 		this.rotationDelta = rotationDelta;
 		
-		this.translation = translation;
-		this.halfTranslation = (int) (translation * 0.5f);
+		this.translationX = translationX;
+		this.doubleTranslationX = translationX * 2;
+		this.translationY = translationY;
 		
 		this.size = size;
 		this.halfSize = (int) (size * 0.5f);
@@ -51,11 +52,11 @@ public class CosmicBody
 		{
 			hasOrbit = false;
 			bodyMatrix = Matrix3x3f.identity();
-			bodyMatrix = bodyMatrix.mul(Matrix3x3f.translate(translation, translation));
+			bodyMatrix = bodyMatrix.mul(Matrix3x3f.translate(translationX, translationY));
 		}
 		else
 		{
-			bodyMatrix = Matrix3x3f.translate(translation, 0);
+			bodyMatrix = Matrix3x3f.translate(translationX, translationY);
 			bodyMatrix = bodyMatrix.mul(Matrix3x3f.rotate(rotation));
 			bodyMatrix = bodyMatrix.mul(parent.getMatrix());
 			rotation += rotationDelta;
@@ -64,19 +65,19 @@ public class CosmicBody
 		bodyVector = bodyMatrix.mul(new Vector2f());
 	}
 	
-	public void draw(Graphics g)
-	{
-		g.setColor(color);
-		g.fillOval((int) (bodyVector.x - halfSize), (int) (bodyVector.y - halfSize), size, size);
-	}
-	
 	public void drawOrbit(Graphics g)
 	{
 		if (hasOrbit)
 		{
 			g.setColor(Color.GRAY);
-			g.drawOval((int) (parent.getVector().x - translation), (int) (parent.getVector().y - translation), halfTranslation, halfTranslation);
+			g.drawOval((int) (parent.getVector().x - translationX), (int) (parent.getVector().y - translationX), doubleTranslationX, doubleTranslationX);
 		}
+	}
+	
+	public void draw(Graphics g)
+	{
+		g.setColor(color);
+		g.fillOval((int) (bodyVector.x - halfSize), (int) (bodyVector.y - halfSize), size, size);
 	}
 	
 	
