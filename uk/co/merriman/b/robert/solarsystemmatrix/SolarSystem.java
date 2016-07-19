@@ -12,6 +12,7 @@ import uk.co.merriman.b.robert.solarsystemmatrix.utils.*;
 
 public class SolarSystem extends JFrame implements Runnable
 {
+	private static final long serialVersionUID = 3543428091734294515L;
 	
 	private static final int SCREEN_W = 1280;
 	private static final int SCREEN_H = 960;
